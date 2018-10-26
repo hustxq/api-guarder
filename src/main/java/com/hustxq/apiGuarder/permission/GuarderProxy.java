@@ -32,18 +32,22 @@ public class GuarderProxy {
 
     @Around("check()")
     public Object doBefore(ProceedingJoinPoint point) throws Throwable {
+//        权限集合
+        Set<Permission> set = new HashSet<>();
+
+//        获取类处权限
         Class target = point.getTarget().getClass();
         Guarder clsGuarder = (Guarder) target.getAnnotation(Guarder.class);
-        Set<Permission> set = new HashSet<>();
         if (null != clsGuarder) {
             Permission[] ps = clsGuarder.name();
             for (Permission p : ps) {
                 set.add(p);
             }
         }
+
+//        获取方法处权限
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
-//        get annotation params
         Guarder guarder = method.getAnnotation(Guarder.class);
         if (null != guarder) {
             Permission[] ps = guarder.name();
