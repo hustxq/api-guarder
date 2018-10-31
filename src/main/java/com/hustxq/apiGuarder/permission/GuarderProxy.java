@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
@@ -58,15 +59,10 @@ public class GuarderProxy {
 
         logger.info(set.toString());
 
-        for (Object arg : point.getArgs()) {
-            if (!(arg instanceof HttpServletRequest)) {
-                continue;
-            }
-            HttpServletRequest request = (HttpServletRequest) arg;
-            String role = request.getHeader("role");
-            if (null == role) {
-                break;
-            }
+        HttpServletRequest request = (HttpServletRequest) RequestContextHolder.getRequestAttributes();
+
+        String role = request.getHeader("role");
+        if (null != role) {
             boolean flag = false;
             for (Permission p : set) {
                 if (p.getV().equalsIgnoreCase(role)) {
@@ -80,6 +76,7 @@ public class GuarderProxy {
                 throw new PermissionException("Forbidden");
             }
         }
-        throw new PermissionException("\'@Guarder\' must have Parameter \'HttpServletRequest\' and so on.");
+
+        throw new PermissionException("\'@Guarder\' must have Parameter \'role\'.");
     }
 }
